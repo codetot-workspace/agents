@@ -11,9 +11,14 @@ This repo tracks which AI coding agents are available for free, how to install t
 ```
 /
 ├── CLAUDE.md          # This file — project instructions for Claude Code
+├── .claude/commands/  # Custom slash commands for delegation
+│   ├── delegate.md    # /project:delegate — auto-pick agent
+│   ├── review-with.md # /project:review-with — cross-agent review
+│   └── consensus.md   # /project:consensus — multi-agent agreement
 ├── docs/
 │   ├── audit.md       # Full audit of free AI coding agents
-│   └── local-models.md # Local Ollama models audit
+│   ├── local-models.md # Local Ollama models audit
+│   └── delegation.md  # Multi-agent delegation guide
 ├── install/           # Installation scripts and configs
 │   └── install.sh     # One-shot installer for selected agents
 └── configs/           # Per-agent configuration templates
@@ -71,6 +76,25 @@ codex
 # Run Goose
 goose
 ```
+
+## Sub-Agent Delegation
+
+When working in any project, Claude should delegate mechanical tasks to sub-agents to save cost and get second opinions. Route by capability:
+
+```
+Simple summary/transform → ollama run qwen2.5-coder:14b "TASK"
+Code review/second opinion → gemini -p "review: $(cat FILE)"
+Git-aware multi-file edits → aider -m "TASK" --yes-always FILE
+Full agentic execution → codex exec "TASK" --full-auto
+Complex reasoning → Claude (keep in main context)
+```
+
+Custom commands available:
+- `/project:delegate <task>` — Auto-pick best agent and run
+- `/project:review-with <agent> <file>` — Cross-agent code review
+- `/project:consensus <question>` — Multi-agent consensus
+
+See `docs/delegation.md` for full guide.
 
 ## Agent Selection Criteria
 
