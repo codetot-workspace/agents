@@ -12,7 +12,8 @@ This repo tracks which AI coding agents are available for free, how to install t
 /
 ├── CLAUDE.md          # This file — project instructions for Claude Code
 ├── docs/
-│   └── audit.md       # Full audit of free AI coding agents
+│   ├── audit.md       # Full audit of free AI coding agents
+│   └── local-models.md # Local Ollama models audit
 ├── install/           # Installation scripts and configs
 │   └── install.sh     # One-shot installer for selected agents
 └── configs/           # Per-agent configuration templates
@@ -31,6 +32,17 @@ The following CLI agents are installed locally:
 | Codex CLI | `codex` | ChatGPT Plus |
 | Goose | `goose` | BYOK |
 
+## Local Models (Ollama on M1 Max 32GB)
+
+| Model | Command | Size | Speed | Use Case |
+|-------|---------|------|-------|----------|
+| Qwen 2.5 Coder 7B | `ollama run qwen2.5-coder:7b` | 4.7GB | ~35 tok/s | Fast autocomplete |
+| Qwen 2.5 Coder 14B | `ollama run qwen2.5-coder:14b` | 9GB | ~20 tok/s | Daily driver |
+| Devstral 24B | `ollama run devstral` | 14GB | ~15 tok/s | Agentic coding |
+| Qwen 2.5 Coder 32B | `ollama run qwen2.5-coder:32b` | 20GB | ~10 tok/s | Best quality |
+
+Run only ONE large model at a time (14B+ uses significant RAM). See `docs/local-models.md` for full details.
+
 ## Conventions
 
 - All agent evaluation notes go in `docs/`
@@ -47,7 +59,10 @@ gemini
 # Run OpenCode
 opencode
 
-# Run Aider with Claude
+# Run Aider with local model (free)
+aider --model ollama_chat/qwen2.5-coder:14b
+
+# Run Aider with Claude (API key)
 aider --model claude-3.5-sonnet
 
 # Run Codex
