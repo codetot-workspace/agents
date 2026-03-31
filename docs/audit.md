@@ -13,25 +13,7 @@
 - **License:** MIT
 - **Verdict:** Top-tier. Best TUI experience. Use with Ollama for zero-cost local usage.
 
-### 2. Gemini CLI
-- **GitHub:** https://github.com/google-gemini/gemini-cli
-- **Stars:** ~100k
-- **What:** Google's terminal agent. Full agentic coding with 1M token context. MCP support.
-- **Install:** `npm install -g @google/gemini-cli`
-- **API key:** FREE with Google account (1,000 req/day). No credit card needed.
-- **License:** Apache 2.0
-- **Verdict:** Best free option. Zero cost entry point.
-
-### 3. OpenAI Codex CLI
-- **GitHub:** https://github.com/openai/codex
-- **Stars:** ~68.5k
-- **What:** OpenAI's Rust-based terminal coding agent.
-- **Install:** `npm install -g @openai/codex`
-- **API key:** Free for ChatGPT Plus subscribers. Otherwise BYOK.
-- **License:** Apache 2.0
-- **Verdict:** Good if you have ChatGPT Plus subscription.
-
-### 4. Aider
+### 2. Aider
 - **GitHub:** https://github.com/Aider-AI/aider
 - **Stars:** ~42k
 - **What:** AI pair programming. Git-native with auto-commits.
@@ -40,7 +22,7 @@
 - **License:** Apache 2.0
 - **Verdict:** Best git integration. Mature and reliable.
 
-### 5. Goose (by Block)
+### 4. Goose (by Block)
 - **GitHub:** https://github.com/block/goose
 - **Stars:** ~34k
 - **What:** Extensible AI agent. MCP-native. Desktop app + CLI.
@@ -49,7 +31,7 @@
 - **License:** Apache 2.0
 - **Verdict:** Most extensible via MCP. Good for orchestration.
 
-### 6. RA.Aid
+### 5. RA.Aid
 - **GitHub:** https://github.com/ai-christianson/RA.Aid
 - **Stars:** ~2.2k
 - **What:** Autonomous agent built on LangGraph. Research/plan/implement pipeline.
@@ -152,10 +134,8 @@
 
 For a comprehensive free AI agent toolkit:
 
-1. **Gemini CLI** — truly free, 1000 req/day, no API cost
-2. **OpenCode** — best TUI, works with any provider
-3. **Aider** — best git integration, mature
-4. **Codex CLI** — free with ChatGPT Plus
-5. **Goose** — most extensible, MCP-native
+1. **OpenCode** — best TUI, works with any provider
+2. **Aider** — best git integration, mature
+3. **Goose** — most extensible, MCP-native
 
 For zero-cost local: Use **Ollama** + any BYOK agent above.

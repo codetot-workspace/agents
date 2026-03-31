@@ -7,17 +7,8 @@ set -e
 echo "=== Installing Free AI Coding Agents ==="
 echo ""
 
-# 1. Gemini CLI (free 1000 req/day)
-echo "[1/5] Gemini CLI..."
-if command -v gemini &> /dev/null; then
-  echo "  ✓ Already installed: $(gemini --version 2>/dev/null || echo 'installed')"
-else
-  npm install -g @google/gemini-cli
-  echo "  ✓ Installed. Run: gemini"
-fi
-
-# 2. OpenCode
-echo "[2/5] OpenCode..."
+# 1. OpenCode
+echo "[1/3] OpenCode..."
 if command -v opencode &> /dev/null; then
   echo "  ✓ Already installed"
 else
@@ -25,8 +16,8 @@ else
   echo "  ✓ Installed. Run: opencode"
 fi
 
-# 3. Aider
-echo "[3/5] Aider..."
+# 2. Aider
+echo "[2/3] Aider..."
 if command -v aider &> /dev/null; then
   echo "  ✓ Already installed: $(aider --version 2>/dev/null || echo 'installed')"
 else
@@ -34,17 +25,8 @@ else
   echo "  ✓ Installed. Run: aider"
 fi
 
-# 4. Codex CLI
-echo "[4/5] Codex CLI..."
-if command -v codex &> /dev/null; then
-  echo "  ✓ Already installed"
-else
-  npm install -g @openai/codex
-  echo "  ✓ Installed. Run: codex"
-fi
-
-# 5. Goose
-echo "[5/5] Goose..."
+# 3. Goose
+echo "[3/3] Goose..."
 if command -v goose &> /dev/null; then
   echo "  ✓ Already installed"
 else
@@ -60,8 +42,6 @@ echo ""
 echo "=== Done! ==="
 echo ""
 echo "Quick start:"
-echo "  gemini          # Free, no API key (Google account)"
 echo "  opencode        # Best TUI, BYOK"
 echo "  aider           # Git-native, BYOK"
-echo "  codex           # Free with ChatGPT Plus"
 echo "  goose           # MCP-native, BYOK"

@@ -9,12 +9,6 @@
 Claude calls other agents via shell commands. Every major CLI agent supports non-interactive mode:
 
 ```bash
-# Gemini CLI (free, 1000 req/day)
-gemini -p "review this code for security issues: $(cat src/auth.ts)"
-
-# Codex CLI (free with ChatGPT Plus)
-codex exec "implement a rate limiter in src/ratelimit.ts" --full-auto --json
-
 # Aider (BYOK, git-aware)
 aider --message "refactor the auth module to use JWT" --yes-always --no-auto-commits src/auth.ts
 
@@ -33,9 +27,6 @@ ollama run qwen2.5-coder:14b "explain what this function does: $(cat src/utils.t
 Register other agents as MCP servers so Claude can call them as tools:
 
 ```bash
-# Codex as MCP server (exposes codex tools to Claude)
-claude mcp add codex -s project -- codex mcp-server
-
 # Ollama via mcp-local-llm (exposes summarize, draft, classify tools)
 git clone https://github.com/aplaceforallmystuff/mcp-local-llm.git
 cd mcp-local-llm && npm install && npm run build
@@ -64,9 +55,6 @@ See `.claude/commands/` in this repo for implementations.
 
 | Agent | Headless Command | Output Format |
 |-------|-----------------|---------------|
-| Gemini CLI | `gemini -p "prompt"` | text (stdout) |
-| Codex CLI | `codex exec "prompt" --json` | JSONL events |
-| Codex Review | `codex review file --json` | JSONL events |
 | Aider | `aider -m "prompt" --yes-always` | text + file edits |
 | Goose | `echo "prompt" \| goose run` | text (stdout) |
 | Ollama | `ollama run model "prompt"` | text (stdout) |
@@ -81,13 +69,13 @@ Is it a simple question/summary?
   → Ollama local (free, fast)
 
 Is it a code review or second opinion?
-  → Gemini CLI (free, 1000/day)
+  → Aider or Ollama local
 
 Does it need multi-file git-aware edits?
   → Aider (best git integration)
 
 Does it need full agentic execution?
-  → Codex CLI or Goose
+  → Goose
 
 Is it complex reasoning or architecture?
   → Claude (keep in main context)
@@ -103,9 +91,9 @@ Add this to any project's CLAUDE.md to enable delegation:
 When a task is mechanical or benefits from a second opinion, delegate to a sub-agent:
 
 - Simple summaries/transforms: `ollama run qwen2.5-coder:14b "TASK"`
-- Code reviews: `gemini -p "review: $(cat FILE)"`
+- Code reviews: `aider --message "review FILE" --yes-always FILE`
 - File edits with git: `aider -m "TASK" --yes-always FILE`
-- Full auto execution: `codex exec "TASK" --full-auto`
+- Full auto execution: `echo "TASK" | goose run`
 
 Always review sub-agent output before accepting. Report what the sub-agent did and flag any issues.
 ```
@@ -114,8 +102,6 @@ Always review sub-agent output before accepting. Report what the sub-agent did a
 
 | Agent | Auth |
 |-------|------|
-| Gemini CLI | Run `gemini` once interactively to login with Google account |
-| Codex CLI | Set `OPENAI_API_KEY` or login with `codex auth` |
 | Aider | Set `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or use `--model ollama_chat/MODEL` |
 | Goose | Configure in `~/.config/goose/config.yaml` |
 | Ollama | No auth needed (local) |

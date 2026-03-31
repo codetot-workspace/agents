@@ -31,10 +31,8 @@ The following CLI agents are installed locally:
 | Agent | Command | Status |
 |-------|---------|--------|
 | Claude Code | `claude` | Active (primary) |
-| Gemini CLI | `gemini` | Free 1000 req/day |
 | OpenCode | `opencode` | BYOK |
 | Aider | `aider` | BYOK |
-| Codex CLI | `codex` | ChatGPT Plus |
 | Goose | `goose` | BYOK |
 
 ## Local Models (Ollama on M1 Max 32GB)
@@ -58,9 +56,6 @@ Run only ONE large model at a time (14B+ uses significant RAM). See `docs/local-
 ## Key Commands
 
 ```bash
-# Run Gemini CLI (free, no API key needed — just Google account)
-gemini
-
 # Run OpenCode
 opencode
 
@@ -69,9 +64,6 @@ aider --model ollama_chat/qwen2.5-coder:14b
 
 # Run Aider with Claude (API key)
 aider --model claude-3.5-sonnet
-
-# Run Codex
-codex
 
 # Run Goose
 goose
@@ -83,9 +75,9 @@ When working in any project, Claude should delegate mechanical tasks to sub-agen
 
 ```
 Simple summary/transform → ollama run qwen2.5-coder:14b "TASK"
-Code review/second opinion → gemini -p "review: $(cat FILE)"
+Code review/second opinion → aider --message "review FILE" --yes-always FILE
 Git-aware multi-file edits → aider -m "TASK" --yes-always FILE
-Full agentic execution → codex exec "TASK" --full-auto
+Full agentic execution → goose run
 Complex reasoning → Claude (keep in main context)
 ```
 
