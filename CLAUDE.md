@@ -31,9 +31,9 @@ The following CLI agents are installed locally:
 | Agent | Command | Status |
 |-------|---------|--------|
 | Claude Code | `claude` | Active (primary) |
-| OpenCode | `opencode` | BYOK |
-| Aider | `aider` | BYOK |
-| Goose | `goose` | BYOK |
+| OpenCode | `opencode` | OpenRouter free (Qwen3 Coder) |
+| Aider | `aider` | OpenRouter free (Qwen3 Coder) |
+| Goose | `goose` | OpenRouter free (Qwen3 Coder) |
 
 ## Local Models (Ollama on M1 Max 32GB)
 
@@ -46,6 +46,20 @@ The following CLI agents are installed locally:
 
 Run only ONE large model at a time (14B+ uses significant RAM). See `docs/local-models.md` for full details.
 
+## Cloud Models (OpenRouter Free Tier)
+
+All agents are configured to use OpenRouter free models via `OPENROUTER_API_KEY` in `.env`.
+
+| Model | ID | Context | Best For |
+|-------|-----|---------|----------|
+| Qwen3 Coder 480B | `qwen/qwen3-coder:free` | 262K | **Default** — agentic coding |
+| Qwen 3.6 Plus | `qwen/qwen3.6-plus:free` | 1M | Massive context tasks |
+| Nemotron 3 Super 120B | `nvidia/nemotron-3-super-120b-a12b:free` | 262K | Multi-agent workflows |
+| GPT-OSS 120B | `openai/gpt-oss-120b:free` | 131K | Reasoning + agentic |
+| Llama 3.3 70B | `meta-llama/llama-3.3-70b-instruct:free` | 65K | Solid all-rounder |
+
+Configs in `configs/` — installed to `~/.aider.conf.yml`, `~/.config/opencode/opencode.json`, and Goose via env vars in `~/.zshrc`.
+
 ## Conventions
 
 - All agent evaluation notes go in `docs/`
@@ -56,17 +70,20 @@ Run only ONE large model at a time (14B+ uses significant RAM). See `docs/local-
 ## Key Commands
 
 ```bash
-# Run OpenCode
+# Run OpenCode (uses OpenRouter Qwen3 Coder by default)
 opencode
 
-# Run Aider with local model (free)
+# Run Aider (uses OpenRouter Qwen3 Coder by default)
+aider
+
+# Run Aider with local model (offline, free)
 aider --model ollama_chat/qwen2.5-coder:14b
 
-# Run Aider with Claude (API key)
-aider --model claude-3.5-sonnet
-
-# Run Goose
+# Run Goose (uses OpenRouter Qwen3 Coder via env vars)
 goose
+
+# Switch Aider to a different free model
+aider --model openrouter/qwen/qwen3.6-plus:free
 ```
 
 ## Sub-Agent Delegation
@@ -77,7 +94,7 @@ When working in any project, Claude should delegate mechanical tasks to sub-agen
 Simple summary/transform → ollama run qwen2.5-coder:14b "TASK"
 Code review/second opinion → aider --message "review FILE" --yes-always FILE
 Git-aware multi-file edits → aider -m "TASK" --yes-always FILE
-Full agentic execution → goose run
+Full agentic execution → goose run -i task-file.md
 Complex reasoning → Claude (keep in main context)
 ```
 
