@@ -120,6 +120,20 @@
 
 ---
 
+## Routing / Provider Layer
+
+### 9router
+- **GitHub:** https://github.com/decolua/9router
+- **What:** Smart routing proxy that connects any AI coding tool to 40+ providers and 100+ models. 3-tier fallback: subscription → cheap ($0.2–0.6/1M tokens) → free unlimited. Real-time quota tracking, format translation (OpenAI/Claude/Gemini), multi-account round-robin.
+- **Install:** `npm install -g 9router` → dashboard at `http://localhost:20128`
+- **Free providers (no signup):** iFlow AI (8+ models), Qwen Code (3+ models), Kiro AI (Claude models), Gemini CLI (180K tokens/month)
+- **Cheap providers:** GLM-4.7 ($0.6/1M), MiniMax M2.1 ($0.2/1M), Kimi K2 ($9/mo flat)
+- **Config:** Point any agent's base URL to `http://localhost:20128/v1` with dashboard API key
+- **License:** Open source
+- **Verdict:** Drop-in replacement for OpenRouter. Auto-fallback means agents never stall on quota exhaustion. Pairs with every BYOK agent above.
+
+---
+
 ## Dead / Paused Projects (Skip)
 
 | Project | Status | Notes |
@@ -139,3 +153,4 @@ For a comprehensive free AI agent toolkit:
 3. **Goose** — most extensible, MCP-native
 
 For zero-cost local: Use **Ollama** + any BYOK agent above.
+4. **9router** — smart routing proxy, auto-fallback across free/cheap providers

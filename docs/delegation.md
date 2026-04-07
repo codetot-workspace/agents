@@ -169,10 +169,31 @@ What to report back.
 |------|---------|-----------|-------|--------|
 | 2026-04-04 | khoipro | `content/mariadb-task.md` | Goose (qwen3.6-plus:free) | Draft post ID 388 created, all E-E-A-T/SEO checks passed |
 
+## Provider Routing with 9router
+
+Instead of configuring each agent with OpenRouter directly, you can run [9router](https://github.com/decolua/9router) as a local proxy that auto-fallbacks across free → cheap → subscription providers:
+
+```bash
+# Start 9router
+9router   # Dashboard at http://localhost:20128
+
+# Point any agent to 9router instead of OpenRouter
+# Endpoint: http://localhost:20128/v1
+# API Key: from 9router dashboard
+```
+
+Benefits for delegation:
+- Agents never stall on quota exhaustion — auto-fallback to next free provider
+- Single dashboard to monitor token usage across all agents
+- Multi-account round-robin for higher throughput
+
+See `configs/9router-aider.conf.yml` and `configs/9router-opencode.json` for ready-to-use configs.
+
 ## Auth Setup Required
 
 | Agent | Auth |
 |-------|------|
-| Aider | Set `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or use `--model ollama_chat/MODEL` |
-| Goose | Configure in `~/.config/goose/config.yaml` |
+| Aider | Set `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, use `--model ollama_chat/MODEL`, or point to 9router |
+| Goose | Configure in `~/.config/goose/config.yaml` or set OpenAI-compatible env vars pointing to 9router |
 | Ollama | No auth needed (local) |
+| 9router | `npm install -g 9router && 9router` — copy API key from dashboard |

@@ -35,6 +35,27 @@ The following CLI agents are installed locally:
 | Aider | `aider` | OpenRouter free (Qwen3 Coder) |
 | Goose | `goose` | OpenRouter free (Qwen3 Coder) |
 
+## Provider Routing: 9router
+
+**GitHub:** https://github.com/decolua/9router
+
+Smart routing proxy that auto-fallbacks across free → cheap → subscription AI providers. Replaces direct OpenRouter usage with automatic failover.
+
+```bash
+# Install & start
+npm install -g 9router
+9router    # Dashboard at http://localhost:20128
+
+# Point any agent to 9router
+# Endpoint: http://localhost:20128/v1
+# API Key: copy from dashboard
+```
+
+Free providers (no signup): iFlow AI, Qwen Code, Kiro AI (Claude models), Gemini CLI.
+Cheap providers: GLM-4.7 ($0.6/1M), MiniMax M2.1 ($0.2/1M), Kimi K2 ($9/mo).
+
+9router-specific configs in `configs/9router-aider.conf.yml` and `configs/9router-opencode.json`.
+
 ## Local Models (Ollama on M1 Max 32GB)
 
 | Model | Command | Size | Speed | Use Case |
@@ -46,9 +67,9 @@ The following CLI agents are installed locally:
 
 Run only ONE large model at a time (14B+ uses significant RAM). See `docs/local-models.md` for full details.
 
-## Cloud Models (OpenRouter Free Tier)
+## Cloud Models (OpenRouter Free Tier / 9router)
 
-All agents are configured to use OpenRouter free models via `OPENROUTER_API_KEY` in `.env`.
+Agents can use OpenRouter directly via `OPENROUTER_API_KEY` in `.env`, or route through 9router for automatic free/cheap fallback.
 
 | Model | ID | Context | Best For |
 |-------|-----|---------|----------|
@@ -70,17 +91,19 @@ Configs in `configs/` — installed to `~/.aider.conf.yml`, `~/.config/opencode/
 ## Key Commands
 
 ```bash
-# Run OpenCode (uses OpenRouter Qwen3 Coder by default)
-opencode
+# Start 9router (smart provider routing)
+9router
 
-# Run Aider (uses OpenRouter Qwen3 Coder by default)
+# Run agents via OpenRouter (default)
+opencode
 aider
+goose
+
+# Run agents via 9router (auto-fallback across free providers)
+aider --config configs/9router-aider.conf.yml
 
 # Run Aider with local model (offline, free)
 aider --model ollama_chat/qwen2.5-coder:14b
-
-# Run Goose (uses OpenRouter Qwen3 Coder via env vars)
-goose
 
 # Switch Aider to a different free model
 aider --model openrouter/qwen/qwen3.6-plus:free
