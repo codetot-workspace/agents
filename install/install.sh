@@ -25,17 +25,10 @@ else
   echo "  ✓ Installed. Run: opencode"
 fi
 
-# 2. Aider
-echo "[2/4] Aider..."
-if command -v aider &> /dev/null; then
-  echo "  ✓ Already installed: $(aider --version 2>/dev/null || echo 'installed')"
-else
-  pipx install aider-chat 2>/dev/null || pip install aider-chat
-  echo "  ✓ Installed. Run: aider"
-fi
+# 2. (Aider removed — poor context handling)
 
-# 3. Goose
-echo "[3/4] Goose..."
+# Goose
+echo "[2/3] Goose..."
 if command -v goose &> /dev/null; then
   echo "  ✓ Already installed"
 else
@@ -53,7 +46,6 @@ echo ""
 echo "Quick start:"
 echo "  9router          # Start routing proxy (http://localhost:20128)"
 echo "  opencode         # Best TUI, BYOK"
-echo "  aider            # Git-native, BYOK"
 echo "  goose            # MCP-native, BYOK"
 echo ""
 echo "To route all agents through 9router:"

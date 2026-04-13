@@ -9,9 +9,6 @@
 Claude calls other agents via shell commands. Every major CLI agent supports non-interactive mode:
 
 ```bash
-# Aider (BYOK, git-aware)
-aider --message "refactor the auth module to use JWT" --yes-always --no-auto-commits src/auth.ts
-
 # Goose (BYOK, MCP-native)
 goose run -i task-file.md
 goose run -t "write tests for the API routes"
@@ -56,7 +53,6 @@ See `.claude/commands/` in this repo for implementations.
 
 | Agent | Headless Command | Output Format |
 |-------|-----------------|---------------|
-| Aider | `aider -m "prompt" --yes-always` | text + file edits |
 | Goose | `goose run -i file.md` or `goose run -t "prompt"` | text (stdout) |
 | Ollama | `ollama run model "prompt"` | text (stdout) |
 | OpenCode | `opencode run "prompt" --format json` | JSON |
@@ -86,10 +82,7 @@ Is it a simple question/summary?
   → Ollama local (free, fast)
 
 Is it a code review or second opinion?
-  → Aider or Ollama local
-
-Does it need multi-file git-aware edits?
-  → Aider (best git integration)
+  → Ollama local (gemma4 or qwen2.5-coder)
 
 Does it need full agentic execution (SSH, WP-CLI, multi-step)?
   → Goose (goose run -i task-file.md)
@@ -108,8 +101,7 @@ Add this to any project's CLAUDE.md to enable delegation:
 When a task is mechanical or benefits from a second opinion, delegate to a sub-agent:
 
 - Simple summaries/transforms: `ollama run qwen2.5-coder:14b "TASK"`
-- Code reviews: `aider --message "review FILE" --yes-always FILE`
-- File edits with git: `aider -m "TASK" --yes-always FILE`
+- Code reviews: `ollama run gemma4 "review FILE"`
 - Full auto execution: `goose run -i task-file.md` or `goose run -t "TASK"`
 
 Always review sub-agent output before accepting. Report what the sub-agent did and flag any issues.
@@ -193,7 +185,6 @@ See `configs/9router-aider.conf.yml` and `configs/9router-opencode.json` for rea
 
 | Agent | Auth |
 |-------|------|
-| Aider | Set `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, use `--model ollama_chat/MODEL`, or point to 9router |
 | Goose | Configure in `~/.config/goose/config.yaml` or set OpenAI-compatible env vars pointing to 9router |
 | Ollama | No auth needed (local) |
 | 9router | `npm install -g 9router && 9router` — copy API key from dashboard |

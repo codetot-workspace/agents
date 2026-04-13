@@ -32,7 +32,6 @@ The following CLI agents are installed locally:
 |-------|---------|--------|
 | Claude Code | `claude` | Active (primary) |
 | OpenCode | `opencode` | OpenRouter free (Qwen3 Coder) |
-| Aider | `aider` | OpenRouter free (Qwen3 Coder) |
 | Goose | `goose` | OpenRouter free (Qwen3 Coder) |
 
 ## Provider Routing: 9router
@@ -54,7 +53,7 @@ npm install -g 9router
 Free providers (no signup): iFlow AI, Qwen Code, Kiro AI (Claude models), Gemini CLI.
 Cheap providers: GLM-4.7 ($0.6/1M), MiniMax M2.1 ($0.2/1M), Kimi K2 ($9/mo).
 
-9router-specific configs in `configs/9router-aider.conf.yml` and `configs/9router-opencode.json`.
+9router-specific config in `configs/9router-opencode.json`.
 
 ## Local Models (Ollama on M1 Max 32GB)
 
@@ -79,7 +78,7 @@ Agents can use OpenRouter directly via `OPENROUTER_API_KEY` in `.env`, or route 
 | GPT-OSS 120B | `openai/gpt-oss-120b:free` | 131K | Reasoning + agentic |
 | Llama 3.3 70B | `meta-llama/llama-3.3-70b-instruct:free` | 65K | Solid all-rounder |
 
-Configs in `configs/` — installed to `~/.aider.conf.yml`, `~/.config/opencode/opencode.json`, and Goose via env vars in `~/.zshrc`.
+Configs in `configs/` — installed to `~/.config/opencode/opencode.json` and Goose via env vars in `~/.zshrc`.
 
 ## Conventions
 
@@ -96,17 +95,10 @@ Configs in `configs/` — installed to `~/.aider.conf.yml`, `~/.config/opencode/
 
 # Run agents via OpenRouter (default)
 opencode
-aider
 goose
 
-# Run agents via 9router (auto-fallback across free providers)
-aider --config configs/9router-aider.conf.yml
-
-# Run Aider with local model (offline, free)
-aider --model ollama_chat/qwen2.5-coder:14b
-
-# Switch Aider to a different free model
-aider --model openrouter/qwen/qwen3.6-plus:free
+# Run OpenCode via 9router (auto-fallback across free providers)
+opencode --config configs/9router-opencode.json
 ```
 
 ## Sub-Agent Delegation
@@ -115,8 +107,7 @@ When working in any project, Claude should delegate mechanical tasks to sub-agen
 
 ```
 Simple summary/transform → ollama run qwen2.5-coder:14b "TASK"
-Code review/second opinion → aider --message "review FILE" --yes-always FILE
-Git-aware multi-file edits → aider -m "TASK" --yes-always FILE
+Code review/second opinion → ollama run gemma4 "review FILE"
 Full agentic execution → goose run -i task-file.md
 Complex reasoning → Claude (keep in main context)
 ```
