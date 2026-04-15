@@ -67,9 +67,12 @@ See `.claude/commands/` in this repo for implementations.
 GOOSE_MODEL="qwen/qwen3-coder-30b-a3b-instruct" goose run -i task.md
 
 # OpenCode via OpenRouter (writes files, faster)
-OPENAI_API_KEY=$OPENROUTER_API_KEY opencode run \
-  -m openrouter/qwen/qwen3-coder-30b-a3b-instruct \
-  "$(cat task.md)"
+# No flags needed — default model + API key configured in ~/.config/opencode/opencode.json
+# and OPENAI_API_KEY=$OPENROUTER_API_KEY in ~/.zshrc
+opencode run "$(cat task.md)"
+
+# Or with explicit model override:
+opencode run -m openrouter/qwen/qwen3-coder-30b-a3b-instruct "$(cat task.md)"
 
 # Ollama via REST API (text only, local/free)
 curl -s http://localhost:11434/api/generate \
