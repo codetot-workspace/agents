@@ -51,11 +51,34 @@ See `.claude/commands/` in this repo for implementations.
 
 ## Agent Headless Reference
 
-| Agent | Headless Command | Output Format |
-|-------|-----------------|---------------|
-| Goose | `goose run -i file.md` or `goose run -t "prompt"` | text (stdout) |
-| Ollama | `ollama run model "prompt"` | text (stdout) |
-| OpenCode | `opencode run "prompt" --format json` | JSON |
+| Agent | Headless Command | Output Format | Writes files? |
+|-------|-----------------|---------------|---------------|
+| Goose | `goose run -i file.md` | text (stdout) + tool calls | Yes (write_file tool) |
+| Ollama | `curl localhost:11434/api/generate -d '{"model":"...","prompt":"..."}'` | JSON stream | No — text only |
+| OpenCode | `OPENAI_API_KEY=$OPENROUTER_API_KEY opencode run -m openrouter/MODEL "$(cat task.md)"` | text (stdout) | Yes (native) |
+
+> **Ollama note:** Never use `ollama run model "$(cat task)"` for large tasks — the TTY spinner
+> escape codes swamp the output. Always use the REST API or `local_agents.py` instead.
+
+### Confirmed working commands (tested 2026-04-15)
+
+```bash
+# Goose via OpenRouter (writes files, agentic)
+GOOSE_MODEL="qwen/qwen3-coder-30b-a3b-instruct" goose run -i task.md
+
+# OpenCode via OpenRouter (writes files, faster)
+OPENAI_API_KEY=$OPENROUTER_API_KEY opencode run \
+  -m openrouter/qwen/qwen3-coder-30b-a3b-instruct \
+  "$(cat task.md)"
+
+# Ollama via REST API (text only, local/free)
+curl -s http://localhost:11434/api/generate \
+  -d "{\"model\":\"qwen2.5-coder:32b\",\"prompt\":\"$(cat task.md)\",\"stream\":false}" \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['response'])"
+
+# Ollama via local_agents.py (best for programmatic use)
+python3 /Users/khoipro/Workspaces/Agents/local_agents.py
+```
 
 ### Goose `run` Key Flags
 
@@ -157,9 +180,11 @@ What to report back.
 
 ## Validated Runs
 
-| Date | Project | Task File | Agent | Result |
-|------|---------|-----------|-------|--------|
-| 2026-04-04 | khoipro | `content/mariadb-task.md` | Goose (qwen3.6-plus:free) | Draft post ID 388 created, all E-E-A-T/SEO checks passed |
+| Date | Project | Task | Agent | Model | Result |
+|------|---------|------|-------|-------|--------|
+| 2026-04-04 | khoipro | Blog post draft | Goose | qwen3.6-plus:free | Post ID 388 created, all E-E-A-T/SEO passed |
+| 2026-04-15 | runcloud-go | `internal/collect/collect.go` | OpenCode | qwen3-coder-30b (OpenRouter) | Files written, all tests pass in ~30s |
+| 2026-04-15 | runcloud-go | `internal/collect/collect.go` | Goose | qwen3-coder-30b (OpenRouter) | Identical output, wrote same files in ~45s |
 
 ## Provider Routing with 9router
 
