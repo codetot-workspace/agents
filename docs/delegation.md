@@ -51,37 +51,61 @@ See `.claude/commands/` in this repo for implementations.
 
 ## Agent Headless Reference
 
-| Agent | Headless Command | Output Format | Writes files? |
-|-------|-----------------|---------------|---------------|
-| Goose | `goose run -i file.md` | text (stdout) + tool calls | Yes (write_file tool) |
-| Ollama | `curl localhost:11434/api/generate -d '{"model":"...","prompt":"..."}'` | JSON stream | No — text only |
-| OpenCode | `OPENAI_API_KEY=$OPENROUTER_API_KEY opencode run -m openrouter/MODEL "$(cat task.md)"` | text (stdout) | Yes (native) |
+| Agent | Headless Command | Writes files? | Idle RAM | Cost |
+|-------|-----------------|---------------|----------|------|
+| OpenCode | `opencode run "$(cat task.md)"` | Yes (native) | 15 MB | $0.07/1M tokens |
+| Goose | `goose run -i task.md` | Yes (write_file) | 0 MB | $0.07/1M tokens |
+| Ollama 7b | REST API (see below) | No — text only | ~5 GB | Free |
+| Ollama 32b | REST API (see below) | No — text only | ~20 GB | Free |
 
-> **Ollama note:** Never use `ollama run model "$(cat task)"` for large tasks — the TTY spinner
-> escape codes swamp the output. Always use the REST API or `local_agents.py` instead.
+> ⚠️ **Never use `ollama run model "$(cat task)"` for background tasks.**
+> The shell process stays alive indefinitely, keeping the model loaded in RAM.
+> A 32b model uses ~20 GB of unified memory. Killed on 2026-04-15 after 3h23m = 5.5 GB wasted.
 
 ### Confirmed working commands (tested 2026-04-15)
 
 ```bash
-# Goose via OpenRouter (writes files, agentic)
-GOOSE_MODEL="qwen/qwen3-coder-30b-a3b-instruct" goose run -i task.md
-
-# OpenCode via OpenRouter (writes files, faster)
-# No flags needed — default model + API key configured in ~/.config/opencode/opencode.json
-# and OPENAI_API_KEY=$OPENROUTER_API_KEY in ~/.zshrc
+# OpenCode — PREFERRED for file-writing tasks (cloud, ~30s, no RAM cost)
+# Default model + API key already configured — no flags needed
 opencode run "$(cat task.md)"
 
-# Or with explicit model override:
-opencode run -m openrouter/qwen/qwen3-coder-30b-a3b-instruct "$(cat task.md)"
+# Goose — for agentic multi-step workflows (cloud, ~45s, no RAM cost)
+GOOSE_MODEL="qwen/qwen3-coder-30b-a3b-instruct" goose run -i task.md
 
-# Ollama via REST API (text only, local/free)
+# Ollama 7b via REST API — for quick local tasks (5 GB RAM, free)
 curl -s http://localhost:11434/api/generate \
-  -d "{\"model\":\"qwen2.5-coder:32b\",\"prompt\":\"$(cat task.md)\",\"stream\":false}" \
+  -d '{"model":"qwen2.5-coder:7b","prompt":"PROMPT","stream":false}' \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['response'])"
 
-# Ollama via local_agents.py (best for programmatic use)
-python3 /Users/khoipro/Workspaces/Agents/local_agents.py
+# Ollama 32b via REST API — for complex local tasks (20 GB RAM, free)
+# Unload immediately after: ollama stop qwen2.5-coder:32b
+curl -s http://localhost:11434/api/generate \
+  -d '{"model":"qwen2.5-coder:32b","prompt":"PROMPT","stream":false}' \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['response'])"
 ```
+
+### ⚠️ Ollama RAM Management (M1 Max 32GB)
+
+```bash
+# Check what's loaded
+ollama ps
+
+# Unload a model immediately after use
+ollama stop qwen2.5-coder:32b   # frees ~20 GB
+ollama stop gemma4               # frees ~6 GB
+
+# Only one large model (14B+) at a time — Ollama auto-unloads after 5min idle
+# but background shell processes prevent auto-unload
+```
+
+**RAM budget per model:**
+
+| Model | RAM (RSS) | Notes |
+|-------|-----------|-------|
+| qwen2.5-coder:7b | ~5 GB | Daily driver for simple tasks |
+| gemma4 | ~6 GB | Reviews, text analysis |
+| qwen2.5-coder:32b | ~20 GB | Reserve for complex codegen, unload after |
+| Ollama daemon (no model) | 60 MB | Always-on, fine |
 
 ### Goose `run` Key Flags
 
@@ -101,21 +125,33 @@ python3 /Users/khoipro/Workspaces/Agents/local_agents.py
 
 ## Task Routing Strategy
 
-Route tasks to the cheapest capable agent:
+Route tasks cheapest-first, RAM-aware:
 
 ```
-Is it a simple question/summary?
-  → Ollama local (free, fast)
+Single file codegen from spec (< 200 lines)?
+  → OpenCode (cloud, 0 RAM, ~30s)
 
-Is it a code review or second opinion?
-  → Ollama local (gemma4 or qwen2.5-coder)
+Multi-file agentic workflow (SSH, multiple edits)?
+  → Goose (cloud, 0 RAM, ~45s)
 
-Does it need full agentic execution (SSH, WP-CLI, multi-step)?
-  → Goose (goose run -i task-file.md)
+Quick question / text analysis / review?
+  → Ollama 7b via REST API (5 GB RAM, free, fast)
 
-Is it complex reasoning or architecture?
+Complex algorithm / large file (> 300 lines)?
+  → Ollama 32b via REST API (20 GB RAM, free, slow)
+  → Run ollama stop <model> immediately after
+
+Architecture / multi-file reasoning / debugging?
   → Claude (keep in main context)
 ```
+
+**Cost comparison (2026-04-15 prices):**
+
+| Agent | Per 1M tokens | Per typical task (~5K tokens) |
+|-------|--------------|-------------------------------|
+| OpenCode / Goose (qwen3-coder-30b) | $0.07 | $0.0004 |
+| Ollama (any model) | Free | Free |
+| Claude Sonnet | ~$3.00 | $0.015 |
 
 ## CLAUDE.md Integration
 
@@ -188,6 +224,23 @@ What to report back.
 | 2026-04-04 | khoipro | Blog post draft | Goose | qwen3.6-plus:free | Post ID 388 created, all E-E-A-T/SEO passed |
 | 2026-04-15 | runcloud-go | `internal/collect/collect.go` | OpenCode | qwen3-coder-30b (OpenRouter) | Files written, all tests pass in ~30s |
 | 2026-04-15 | runcloud-go | `internal/collect/collect.go` | Goose | qwen3-coder-30b (OpenRouter) | Identical output, wrote same files in ~45s |
+| 2026-04-15 | runcloud-go | `internal/collect/ssh.go` | OpenCode | qwen3-coder-30b (OpenRouter) | Passed — needed 1 nil-check fix |
+| 2026-04-15 | runcloud-go | `internal/portal/webhook.go` | Goose | qwen3-coder-30b (OpenRouter) | All tests pass |
+| 2026-04-15 | runcloud-go | `internal/portal/client.go` | Goose | qwen3-coder-30b (OpenRouter) | Tests pass, 1 unused import fix |
+| 2026-04-15 | runcloud-go | `internal/tui/dashboard.go` | OpenCode | qwen3-coder-30b (OpenRouter) | Built OK, needed 5 logic fixes (counts, age, events) |
+| 2026-04-15 | runcloud-go | `cmd/sites.go` | Goose | qwen3-coder-30b (OpenRouter) | Perfect — zero fixes needed |
+| 2026-04-15 | runcloud-go | `internal/web/static/index.html` (dashboard v2) | OpenCode | qwen3-coder-30b (OpenRouter) | 1256 lines, built OK, needed metric layout fix |
+
+## Failures & Lessons (2026-04-15)
+
+| Agent | Failure | Root Cause | Fix |
+|-------|---------|------------|-----|
+| `ollama run qwen2.5-coder:32b "$(cat task)"` | Zombie processes, 5.5 GB RAM wasted for 3h23m | Shell process keeps model loaded; TTY spinner swamps output | Use REST API: `curl localhost:11434/api/generate` |
+| Goose `qwen3.6-plus:free` | Model deprecated | OpenRouter removed the free model | Updated `~/.zshrc` to `qwen3-coder:free` then paid model |
+| Goose `qwen3-coder:free` | Rate limited | Free tier quota too low for large tasks | Use paid `qwen3-coder-30b-a3b-instruct` ($0.07/1M) |
+| OpenCode `--print` flag | Flag doesn't exist | Wrong CLI syntax assumption | Correct: `opencode run "$(cat task.md)"` |
+| OpenCode `server.go` | Invented DB methods (`GetAllServers`, `GetWebAppByID`) | LLM hallucinated non-existent API | Always verify generated code compiles before trusting |
+| OpenCode `internal/web/static/index.html` | Metric cells stacked vertically | `flex-direction:column` on `<td>` elements | Rewrote CSS to horizontal `metric-cell` layout |
 
 ## Provider Routing with 9router
 
