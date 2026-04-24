@@ -12,7 +12,9 @@ This repo tracks which AI coding agents are available for free, how to install t
 /
 ├── CLAUDE.md          # This file — project instructions for Claude Code
 ├── .claude/commands/  # Custom slash commands for delegation
+│   ├── estimate.md    # /project:estimate — FE/BE estimation from brief
 │   ├── delegate.md    # /project:delegate — auto-pick agent
+│   ├── route.md       # /project:route — cheapest agent routing
 │   ├── review-with.md # /project:review-with — cross-agent review
 │   └── consensus.md   # /project:consensus — multi-agent agreement
 ├── docs/
@@ -21,6 +23,7 @@ This repo tracks which AI coding agents are available for free, how to install t
 │   └── delegation.md  # Multi-agent delegation guide
 ├── install/           # Installation scripts and configs
 │   └── install.sh     # One-shot installer for selected agents
+├── samples/           # Sample briefs and templates for estimation
 └── configs/           # Per-agent configuration templates
 ```
 
@@ -139,6 +142,7 @@ Complex reasoning → Claude (keep in main context)
 ```
 
 Custom commands available:
+- `/project:estimate <brief>` — Estimate FE/BE days from a project brief (delegates section naming to gemma4)
 - `/project:delegate <task>` — Auto-pick best agent and run
 - `/project:review-with <agent> <file>` — Cross-agent code review
 - `/project:consensus <question>` — Multi-agent consensus

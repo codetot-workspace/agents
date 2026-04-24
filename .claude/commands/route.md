@@ -29,7 +29,7 @@ Use Bash tool with `timeout: 5000`.
 # Prefer Ollama REST API (free, local — NEVER use `ollama run` interactively)
 curl -s --max-time 60 http://localhost:11434/api/generate \
   -d '{"model":"qwen2.5-coder:7b","prompt":"TASK","stream":false}' \
-  | python3 -c "import sys,json; print(json.load(sys.stdin)['response'])"
+  | jq -r '.response'
 
 # Fallback: DeepSeek (cheap, reliable)
 opencode run -m deepseek/deepseek-chat "TASK"
@@ -46,7 +46,7 @@ opencode run -m deepseek/deepseek-reasoner "TASK"
 # Text/review tasks → gemma4 via REST API
 curl -s --max-time 120 http://localhost:11434/api/generate \
   -d '{"model":"gemma4","prompt":"TASK","stream":false}' \
-  | python3 -c "import sys,json; print(json.load(sys.stdin)['response'])"
+  | jq -r '.response'
 ```
 
 **For code review specifically — run multi-agent consensus:**

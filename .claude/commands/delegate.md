@@ -49,7 +49,7 @@ Use Bash tool with `timeout: 60000` (1 min).
 ```bash
 curl -s --max-time 120 http://localhost:11434/api/generate \
   -d '{"model":"MODEL","prompt":"TASK","stream":false}' \
-  | python3 -c "import sys,json; print(json.load(sys.stdin)['response'])"
+  | jq -r '.response'
 ```
 
 **Goose (agentic execution):**

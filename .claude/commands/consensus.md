@@ -21,7 +21,7 @@ Use Bash tool with `timeout: 120000`.
 ```bash
 curl -s --max-time 120 http://localhost:11434/api/generate \
   -d '{"model":"qwen2.5-coder:14b","prompt":"TASK","stream":false}' \
-  | python3 -c "import sys,json; print(json.load(sys.stdin)['response'])"
+  | jq -r '.response'
 ```
 
 **Gemini CLI (free tier, large context):**
