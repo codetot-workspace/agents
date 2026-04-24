@@ -157,10 +157,39 @@ curl -s --max-time 120 http://localhost:11434/api/generate \
   | jq -r '.response'
 ```
 
-## Step 7: Report
+## Step 7: Validate generated code
+
+**IMPORTANT: Always validate before reporting success.**
+
+Run these checks on the generated files (use Bash tool with `timeout: 30000`):
+
+```bash
+# Lint PHP
+cd $THEME_DIR && composer lint -- templates/blocks/{block-name}.php
+
+# Lint CSS
+./node_modules/.bin/stylelint src/postcss/blocks/{block-name}.css
+
+# Lint JS (if created)
+npx eslint src/js/modules/{block-name}.js
+
+# Format check
+npx prettier --check src/postcss/blocks/{block-name}.css src/js/modules/{block-name}.js
+
+# Build check
+npm run build
+```
+
+If any lint errors are found, fix them before reporting. Common fixes:
+- PHP: missing escaping → add `esc_html()`, `esc_attr()`, `wp_kses_post()`
+- CSS: duplicate selectors → merge them
+- JS: unused vars → remove or prefix with `_`
+
+## Step 8: Report
 
 Tell the user:
 - Files created (with paths)
 - Whether JS was included and why
+- Validation results (all linters passed / issues found and fixed)
 - How to use: `get_template_part('templates/blocks/{block-name}', null, ['title' => '...', ...])`
 - Remind to run `npm run dev` to rebuild

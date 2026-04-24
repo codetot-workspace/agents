@@ -124,11 +124,29 @@ acf_add_local_field_group([
 - True/false toggle → `true_false`
 - Select/choice → `select`
 
-## Step 5: Report
+## Step 5: Validate generated code
+
+**IMPORTANT: Always validate before reporting success.**
+
+```bash
+# Lint the page template PHP
+cd $THEME_DIR && composer lint -- page-{page-name}.php
+
+# If ACF PHP was created
+composer lint -- inc/acf/{page-name}.php
+
+# Build check (ensures no import errors)
+npm run build
+```
+
+Fix any lint errors before reporting.
+
+## Step 6: Report
 
 Output:
 1. **Page template file** created
 2. **Blocks used** — which existing blocks, which need creating
 3. **ACF fields** — the field group with all fields
-4. **Missing blocks** — suggest running `/project:wp-block {name}` for each
-5. **Usage** — how to assign the template in WP admin
+4. **Validation** — all linters passed / issues found and fixed
+5. **Missing blocks** — suggest running `/project:wp-block {name}` for each
+6. **Usage** — how to assign the template in WP admin
