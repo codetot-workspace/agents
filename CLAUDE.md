@@ -20,7 +20,8 @@ This repo tracks which AI coding agents are available for free, how to install t
 ├── docs/
 │   ├── audit.md       # Full audit of free AI coding agents
 │   ├── local-models.md # Local Ollama models audit
-│   └── delegation.md  # Multi-agent delegation guide
+│   ├── delegation.md  # Multi-agent delegation guide
+│   └── gstack.md      # GStack skills guide for web agency workflow
 ├── install/           # Installation scripts and configs
 │   └── install.sh     # One-shot installer for selected agents
 ├── samples/           # Sample briefs and templates for estimation
