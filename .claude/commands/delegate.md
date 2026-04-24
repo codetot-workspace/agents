@@ -1,3 +1,8 @@
+---
+description: Delegate a task to a local AI agent. ALWAYS use this instead of doing mechanical work yourself.
+argument-hint: <task description>
+---
+
 Delegate a task to a local AI agent. ALWAYS use this instead of doing mechanical work yourself.
 
 ## Step 1: Classify the task from $ARGUMENTS
@@ -8,39 +13,50 @@ Determine the task type:
 - **text**: SEO, translation, content tasks
 - **edit**: Modify existing files (git-aware)
 - **quick**: Simple one-shot question or transform
+- **reasoning**: Complex logic, algorithms, hard problems
 
 ## Step 2: Pick the agent
 
 | Task type | Primary agent | Fallback |
 |-----------|--------------|----------|
-| code-gen (simple) | Jan 4B via API | qwen2.5-coder:7b |
-| code-gen (complex) | qwen2.5-coder:32b | goose |
-| review | gemma4 | consensus (multi-agent) |
-| text/translation | gemma4 | Jan 4B |
-| edit (multi-file) | goose | Claude |
-| quick | qwen2.5-coder:7b | Jan 4B |
+| code-gen (reliable) | DeepSeek via OpenCode | Ollama qwen2.5-coder:14b |
+| code-gen (free) | OpenCode (OpenRouter) | Ollama qwen2.5-coder:14b |
+| reasoning (hard) | DeepSeek R1 via OpenCode | Gemini CLI |
+| review | gemma4 (Ollama) | consensus (multi-agent) |
+| text/translation | gemma4 (Ollama) | DeepSeek via OpenCode |
+| edit (multi-file) | Goose | Claude |
+| quick | Ollama qwen2.5-coder:7b | DeepSeek via OpenCode |
 
 ## Step 3: Run the agent
 
-**Jan (API — best for structured output):**
-```bash
-curl -s http://localhost:6767/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{"model":"janhq/Jan-v3-4b-base-instruct-Q4_K_XL","messages":[{"role":"system","content":"SYSTEM_PROMPT"},{"role":"user","content":"TASK"}],"temperature":0.3}' \
-  | python3 -c "import sys,json; print(json.load(sys.stdin)['choices'][0]['message']['content'])"
-```
+**IMPORTANT: Always set a timeout. Never let an agent call hang indefinitely.**
 
-**Ollama (CLI — best for quick tasks):**
+**DeepSeek via OpenCode (preferred — cheap, reliable, no rate limits):**
 ```bash
-ollama run MODEL "TASK"
+opencode run -m deepseek/deepseek-chat "TASK"
+# For hard reasoning:
+opencode run -m deepseek/deepseek-reasoner "TASK"
+```
+Use Bash tool with `timeout: 120000` (2 min).
+
+**OpenCode via OpenRouter (free, may rate-limit):**
+```bash
+opencode run "TASK"
+```
+Use Bash tool with `timeout: 60000` (1 min).
+
+**Ollama via REST API (local, no hanging — NEVER use `ollama run` interactively):**
+```bash
+curl -s --max-time 120 http://localhost:11434/api/generate \
+  -d '{"model":"MODEL","prompt":"TASK","stream":false}' \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['response'])"
 ```
 
 **Goose (agentic execution):**
 ```bash
-echo "TASK" | goose run
-# or with a task file:
-goose run -i task-file.md
+goose run -t "TASK" --no-session
 ```
+Use Bash tool with `timeout: 180000` (3 min).
 
 ## Step 4: Evaluate the output
 

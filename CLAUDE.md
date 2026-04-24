@@ -66,7 +66,30 @@ Cheap providers: GLM-4.7 ($0.6/1M), MiniMax M2.1 ($0.2/1M), Kimi K2 ($9/mo).
 
 Run only ONE large model at a time (14B+ uses significant RAM). See `docs/local-models.md` for full details.
 
-## Cloud Models (OpenRouter Free Tier / 9router)
+## Cloud Models — DeepSeek (paid, cheap)
+
+Direct API via `DEEPSEEK_API_KEY` in `.env` and `~/.zshrc`. Much cheaper than Claude, more reliable than free tier.
+
+| Model | ID | Context | Cost (per 1M) | Best For |
+|-------|-----|---------|---------------|----------|
+| DeepSeek V4 Flash | `deepseek-chat` | 128K | $0.27 in / $1.10 out | **Best value** — coding, reasoning |
+| DeepSeek R1 | `deepseek-reasoner` | 64K | $0.55 in / $2.19 out | Deep reasoning, hard problems |
+
+```bash
+# OpenCode with DeepSeek (tested, works)
+opencode run -m deepseek/deepseek-chat "TASK"
+
+# OpenCode with DeepSeek config (standalone)
+opencode --config configs/deepseek-opencode.json run "TASK"
+
+# Direct curl (always works, for scripting)
+curl -s https://api.deepseek.com/v1/chat/completions \
+  -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"deepseek-chat","messages":[{"role":"user","content":"PROMPT"}]}'
+```
+
+## Cloud Models — OpenRouter (free tier / 9router)
 
 Agents can use OpenRouter directly via `OPENROUTER_API_KEY` in `.env`, or route through 9router for automatic free/cheap fallback.
 
@@ -90,15 +113,18 @@ Configs in `configs/` — installed to `~/.config/opencode/opencode.json` and Go
 ## Key Commands
 
 ```bash
-# Start 9router (smart provider routing)
-9router
+# Run OpenCode with DeepSeek (cheap, reliable)
+opencode run -m deepseek/deepseek-chat "TASK"
 
-# Run agents via OpenRouter (default)
+# Run agents via OpenRouter (free, rate-limited)
 opencode
 goose
 
 # Run OpenCode via 9router (auto-fallback across free providers)
 opencode --config configs/9router-opencode.json
+
+# Start 9router (smart provider routing)
+9router
 ```
 
 ## Sub-Agent Delegation

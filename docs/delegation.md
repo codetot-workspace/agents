@@ -53,8 +53,9 @@ See `.claude/commands/` in this repo for implementations.
 
 | Agent | Headless Command | Writes files? | Idle RAM | Cost |
 |-------|-----------------|---------------|----------|------|
-| OpenCode | `opencode run "$(cat task.md)"` | Yes (native) | 15 MB | $0.07/1M tokens |
-| Goose | `goose run -i task.md` | Yes (write_file) | 0 MB | $0.07/1M tokens |
+| OpenCode+DeepSeek | `opencode run -m deepseek/deepseek-chat "TASK"` | Yes (native) | 15 MB | $0.27/$1.10 per 1M |
+| OpenCode | `opencode run "$(cat task.md)"` | Yes (native) | 15 MB | Free (OpenRouter) |
+| Goose | `goose run -i task.md` | Yes (write_file) | 0 MB | Free (OpenRouter) |
 | Ollama 7b | REST API (see below) | No — text only | ~5 GB | Free |
 | Ollama 32b | REST API (see below) | No — text only | ~20 GB | Free |
 
@@ -62,11 +63,14 @@ See `.claude/commands/` in this repo for implementations.
 > The shell process stays alive indefinitely, keeping the model loaded in RAM.
 > A 32b model uses ~20 GB of unified memory. Killed on 2026-04-15 after 3h23m = 5.5 GB wasted.
 
-### Confirmed working commands (tested 2026-04-15)
+### Confirmed working commands (tested 2026-04-24)
 
 ```bash
-# OpenCode — PREFERRED for file-writing tasks (cloud, ~30s, no RAM cost)
-# Default model + API key already configured — no flags needed
+# DeepSeek — PREFERRED for reliable work (cheap, no rate limits, ~30s)
+opencode run -m deepseek/deepseek-chat "$(cat task.md)"
+opencode run -m deepseek/deepseek-reasoner "$(cat task.md)"  # hard reasoning
+
+# OpenCode via OpenRouter — for free tier tasks (may rate-limit)
 opencode run "$(cat task.md)"
 
 # Goose — for agentic multi-step workflows (cloud, ~45s, no RAM cost)
@@ -128,8 +132,16 @@ ollama stop gemma4               # frees ~6 GB
 Route tasks cheapest-first, RAM-aware:
 
 ```
-Single file codegen from spec (< 200 lines)?
-  → OpenCode (cloud, 0 RAM, ~30s)
+Single file codegen (reliable, quality matters)?
+  → DeepSeek via OpenCode (cloud, 0 RAM, ~30s, cheap)
+  → opencode run -m deepseek/deepseek-chat "TASK"
+
+Hard reasoning / complex algorithms?
+  → DeepSeek R1 via OpenCode (cloud, 0 RAM, ~45s)
+  → opencode run -m deepseek/deepseek-reasoner "TASK"
+
+Single file codegen (free tier OK)?
+  → OpenCode (cloud, 0 RAM, ~30s, free)
 
 Multi-file agentic workflow (SSH, multiple edits)?
   → Goose (cloud, 0 RAM, ~45s)
@@ -145,13 +157,15 @@ Architecture / multi-file reasoning / debugging?
   → Claude (keep in main context)
 ```
 
-**Cost comparison (2026-04-15 prices):**
+**Cost comparison (2026-04-24 prices):**
 
-| Agent | Per 1M tokens | Per typical task (~5K tokens) |
-|-------|--------------|-------------------------------|
-| OpenCode / Goose (qwen3-coder-30b) | $0.07 | $0.0004 |
+| Agent | Per 1M tokens (in/out) | Per typical task (~5K tokens) |
+|-------|------------------------|-------------------------------|
 | Ollama (any model) | Free | Free |
-| Claude Sonnet | ~$3.00 | $0.015 |
+| OpenCode / Goose (qwen3-coder-30b) | $0.07 | $0.0004 |
+| DeepSeek V4 Flash | $0.27 / $1.10 | ~$0.003 |
+| DeepSeek R1 | $0.55 / $2.19 | ~$0.007 |
+| Claude Sonnet | ~$3.00 / $15.00 | ~$0.045 |
 
 ## CLAUDE.md Integration
 
@@ -266,6 +280,7 @@ See `configs/9router-aider.conf.yml` and `configs/9router-opencode.json` for rea
 
 | Agent | Auth |
 |-------|------|
+| OpenCode+DeepSeek | `DEEPSEEK_API_KEY` in `~/.zshrc` — provider auto-configured in `~/.config/opencode/opencode.json` |
 | Goose | Configure in `~/.config/goose/config.yaml` or set OpenAI-compatible env vars pointing to 9router |
 | Ollama | No auth needed (local) |
 | 9router | `npm install -g 9router && 9router` — copy API key from dashboard |
