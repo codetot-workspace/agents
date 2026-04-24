@@ -144,6 +144,8 @@ Complex reasoning → Claude (keep in main context)
 
 Custom commands available:
 - `/project:estimate <brief>` — Estimate FE/BE days from a project brief (delegates section naming to gemma4)
+- `/project:wp-block <name>` — Scaffold a wp-theme-base block (PHP + PostCSS + optional JS)
+- `/project:wp-page <name>` — Scaffold a full page template from sections (composes blocks + ACF fields)
 - `/project:delegate <task>` — Auto-pick best agent and run
 - `/project:review-with <agent> <file>` — Cross-agent code review
 - `/project:consensus <question>` — Multi-agent consensus
